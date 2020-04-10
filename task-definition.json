@@ -1,0 +1,30 @@
+[
+  {
+    "cpu": ${ecs_cpu},
+    "essential": true,
+    "image": "${image_url}",
+    "memory": ${ecs_mem},
+    "name": "${container_name}",
+    "networkMode": "awsvpc",
+    "portMappings": [
+      {
+        "containerPort": ${app_port},
+        "hostPort": ${app_port}
+      }
+    ],
+    "mountPoints": [
+      {
+        "containerPath": "${container_mount_path}",
+        "sourceVolume": "${source_volume}"
+      }
+    ],
+    "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-group": "${log_group_name}",
+            "awslogs-region": "${log_group_region}",
+            "awslogs-stream-prefix": "ecs"
+        }
+    }
+  }
+]
