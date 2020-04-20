@@ -15,7 +15,7 @@ resource "aws_iam_role_policy" "ecs" {
   name = "${var.app_name}-ecs-iam-policy"
   role = aws_iam_role.ecs.name
 
-  policy = file ("${path.module}/policies/ecs-task-execution-role-policy.json")
+  policy = file("${path.module}/policies/ecs-task-execution-role-policy.json")
 }
 
 ### Networking
@@ -86,14 +86,14 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = element(aws_nat_gateway.nat-gw.*.id, count.index)
   }
 }
 
 # Associate the route tables to the private subnets
 resource "aws_route_table_association" "private" {
-  count          =  var.az_count
+  count          = var.az_count
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
 }
@@ -198,7 +198,7 @@ resource "aws_alb_listener" "app_front_end" {
 ### EFS
 resource "aws_efs_file_system" "efs" {
   creation_token = "terraform-efs-fs"
-  encrypted = true
+  encrypted      = true
 }
 
 resource "aws_efs_mount_target" "efs" {

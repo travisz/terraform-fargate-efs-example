@@ -30,7 +30,7 @@ variable "ecs_cluster_name" {
 
 variable "app_image" {
   description = "Docker image to run in the container"
-  default = "nginx:latest"
+  default     = "nginx:latest"
 }
 
 variable "app_name" {
@@ -49,7 +49,7 @@ variable "ecs_mem" {
 
 variable "container_mount_path" {
   default = "/var/www/html"
-  type = string
+  type    = string
 }
 
 variable "platform_version" {
