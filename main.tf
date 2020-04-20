@@ -15,7 +15,7 @@ resource "aws_iam_role_policy" "ecs" {
   name = "${var.app_name}-ecs-iam-policy"
   role = aws_iam_role.ecs.name
 
-  policy = file ("${path.module}/policies/ecs-task-execution-role-policy.json")
+  policy = file("${path.module}/policies/ecs-task-execution-role-policy.json")
 }
 
 ### Networking
@@ -70,7 +70,7 @@ resource "aws_route" "public" {
 resource "aws_eip" "nat-gw" {
   count      = var.az_count
   vpc        = true
-  depends_on = ["aws_internet_gateway.gw"]
+  depends_on = [aws_internet_gateway.gw]
 }
 
 # NAT Gateway, one per AZ for the private subnet to have internet access
@@ -86,14 +86,14 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = element(aws_nat_gateway.nat-gw.*.id, count.index)
   }
 }
 
 # Associate the route tables to the private subnets
 resource "aws_route_table_association" "private" {
-  count          =  var.az_count
+  count          = var.az_count
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
 }
@@ -198,14 +198,14 @@ resource "aws_alb_listener" "app_front_end" {
 ### EFS
 resource "aws_efs_file_system" "efs" {
   creation_token = "terraform-efs-fs"
-  encrypted = true
+  encrypted      = true
 }
 
 resource "aws_efs_mount_target" "efs" {
-  file_system_id  = "${aws_efs_file_system.efs.id}"
+  file_system_id  = aws_efs_file_system.efs.id
   count           = var.az_count
   subnet_id       = element(aws_subnet.private.*.id, count.index)
-  security_groups = ["${aws_security_group.efs-sg.id}"]
+  security_groups = [aws_security_group.efs-sg.id]
 }
 
 ### ECS
@@ -237,7 +237,7 @@ resource "aws_ecs_task_definition" "app" {
   family                   = var.app_name
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  container_definitions    = "${data.template_file.task_definition.rendered}"
+  container_definitions    = data.template_file.task_definition.rendered
   execution_role_arn       = aws_iam_role.ecs.arn
   cpu                      = var.ecs_cpu
   memory                   = var.ecs_mem
@@ -266,13 +266,13 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.app.id}"
+    target_group_arn = aws_alb_target_group.app.id
     container_name   = var.app_name
     container_port   = 80
   }
 
   depends_on = [
-    "aws_alb_listener.app_front_end"
+    aws_alb_listener.app_front_end
   ]
 }
 
