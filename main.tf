@@ -70,7 +70,7 @@ resource "aws_route" "public" {
 resource "aws_eip" "nat-gw" {
   count      = var.az_count
   vpc        = true
-  depends_on = ["aws_internet_gateway.gw"]
+  depends_on = [aws_internet_gateway.gw]
 }
 
 # NAT Gateway, one per AZ for the private subnet to have internet access
@@ -202,10 +202,10 @@ resource "aws_efs_file_system" "efs" {
 }
 
 resource "aws_efs_mount_target" "efs" {
-  file_system_id  = "${aws_efs_file_system.efs.id}"
+  file_system_id  = aws_efs_file_system.efs.id
   count           = var.az_count
   subnet_id       = element(aws_subnet.private.*.id, count.index)
-  security_groups = ["${aws_security_group.efs-sg.id}"]
+  security_groups = [aws_security_group.efs-sg.id]
 }
 
 ### ECS
@@ -237,7 +237,7 @@ resource "aws_ecs_task_definition" "app" {
   family                   = var.app_name
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  container_definitions    = "${data.template_file.task_definition.rendered}"
+  container_definitions    = data.template_file.task_definition.rendered
   execution_role_arn       = aws_iam_role.ecs.arn
   cpu                      = var.ecs_cpu
   memory                   = var.ecs_mem
@@ -266,13 +266,13 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.app.id}"
+    target_group_arn = aws_alb_target_group.app.id
     container_name   = var.app_name
     container_port   = 80
   }
 
   depends_on = [
-    "aws_alb_listener.app_front_end"
+    aws_alb_listener.app_front_end
   ]
 }
 
